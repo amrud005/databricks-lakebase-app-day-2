@@ -2,268 +2,336 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Massive Stock Watchlist</title>
+  <title>Weather Intelligence</title>
   <style>
     :root {
-      --bg: #f4f6fb;
+      --bg: #e8f1f8;
+      --bg-accent: #cfe0ee;
       --card-bg: #ffffff;
-      --border: #e4e7ee;
-      --text: #1f2430;
-      --muted: #6b7280;
-      --accent: #4f46e5;
-      --accent-hover: #4338ca;
-      --danger: #dc2626;
-      --danger-hover: #b91c1c;
-      --radius: 10px;
+      --border: #b7c9d8;
+      --text: #1a2b3c;
+      --muted: #5a6f82;
+      --accent: #0b6e99;
+      --accent-hover: #095a7d;
+      --radius: 8px;
     }
 
     * { box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      max-width: 640px;
-      margin: 48px auto;
-      padding: 0 20px;
+      font-family: "Source Sans 3", "IBM Plex Sans", "Segoe UI", sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 20px 48px;
       color: var(--text);
-      background: var(--bg);
+      background:
+        radial-gradient(ellipse at top, #f7fbfe 0%, var(--bg) 45%, var(--bg-accent) 100%);
+      min-height: 100vh;
     }
 
     h1 {
-      font-size: 24px;
+      font-family: "Fraunces", "Source Serif 4", Georgia, serif;
+      font-size: 32px;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin: 0 0 6px;
+      letter-spacing: -0.02em;
     }
 
     .hint {
       color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
+      font-size: 14px;
       line-height: 1.5;
+      margin: 0 0 28px;
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      margin-top: 24px;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+    section {
+      margin-top: 28px;
+    }
+
+    section h2 {
+      font-size: 18px;
+      margin: 0 0 10px;
+      font-weight: 600;
     }
 
     label {
       display: block;
-      margin-top: 16px;
-      font-weight: 600;
       font-size: 13px;
-      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--muted);
     }
-    label:first-child { margin-top: 0; }
 
-    input[type="text"] {
+    textarea, input[type="text"], input[type="number"], select {
       width: 100%;
       padding: 10px 12px;
-      margin-top: 6px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.15s ease;
+      border-radius: var(--radius);
+      font: inherit;
+      background: #fff;
+      color: var(--text);
     }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
     }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .row > div { flex: 1; min-width: 120px; }
 
     button {
-      margin-top: 18px;
-      padding: 10px 18px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
       background: var(--accent);
       color: #fff;
-      font-size: 14px;
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px 18px;
+      font: inherit;
       font-weight: 600;
-      transition: background 0.15s ease;
+      cursor: pointer;
     }
-    button:hover { background: var(--accent-hover); }
-    button:active { transform: translateY(1px); }
 
-    #result {
-      margin-top: 16px;
-      white-space: pre-wrap;
-      background: #f6f6f6;
-      padding: 12px 14px;
-      border-radius: 8px;
-      min-height: 20px;
+    button:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: wait; }
+
+    .status {
+      margin-top: 10px;
       font-size: 13px;
       color: var(--muted);
+      min-height: 1.2em;
     }
-    #result:empty { display: none; }
 
-    table {
-      width: 100%;
-      margin-top: 0;
-      border-collapse: collapse;
+    .status.error { color: #b42318; }
+
+    #results {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0;
     }
-    th, td {
-      text-align: left;
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--border);
+
+    #results li {
+      padding: 14px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    #results li:first-child { border-top: none; }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .headline {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .chunk {
       font-size: 14px;
-    }
-    th {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      font-weight: 600;
-    }
-    tbody tr:hover { background: #fafbfe; }
-    tbody tr:last-child td { border-bottom: none; }
-
-    .empty-row td {
-      color: var(--muted);
-      text-align: center;
-      padding: 20px 8px;
+      line-height: 1.55;
+      white-space: pre-wrap;
     }
 
-    .delete-btn {
-      margin-top: 0;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
+    .loc-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .loc-chips button.chip {
       background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
     }
-    .delete-btn:hover { background: var(--danger); color: #fff; }
-    .delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .loc-chips button.chip.selected {
+      background: #d9eef7;
+      border-color: var(--accent);
+    }
+
+    .search-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Stock Watchlist</h1>
-  <p class="hint">Enter a single ticker symbol. This sends exactly ONE call to the Massive API to fetch the latest price, then adds it to your watchlist.</p>
+  <h1>Weather Intelligence</h1>
+  <p class="hint">
+    Ask about weather risks and forecasts for your cities.
+  </p>
 
-  <div class="card">
-    <form id="stock-form">
-      <label for="symbol">Ticker symbol</label>
-      <input type="text" id="symbol" name="symbol" placeholder="AAPL" required>
-      <button type="submit">Add to watchlist</button>
+  <section>
+    <h2>Ask a question</h2>
+    <form id="search-form">
+      <label for="query">Your question</label>
+      <textarea
+        id="query"
+        name="query"
+        placeholder="Will there be flooding in Chicago this weekend?"
+        required
+      ></textarea>
+      <div class="search-actions">
+        <button type="submit" id="search-btn">Search</button>
+      </div>
     </form>
+    <p class="status" id="search-status"></p>
+    <ul id="results"></ul>
+  </section>
 
-    <div id="result"></div>
-  </div>
-
-  <div class="card">
-    <table id="watchlist-table">
-      <thead>
-        <tr>
-          <th>Symbol</th>
-          <th>Email</th>
-          <th>Latest price</th>
-          <th>Updated</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="watchlist-body"></tbody>
-    </table>
-  </div>
+  <section>
+    <h2>Refresh weather</h2>
+    <p class="hint" style="margin-bottom: 12px;">
+      Choose cities to pull the latest alerts and forecasts.
+    </p>
+    <label>Cities</label>
+    <div class="loc-chips" id="loc-chips">
+      {% for loc in known_locations %}
+      <button type="button" class="chip" data-loc="{{ loc }}">{{ loc }}</button>
+      {% endfor %}
+    </div>
+    <div class="search-actions" style="margin-top: 12px;">
+      <button type="button" id="sync-btn">Refresh weather</button>
+    </div>
+    <p class="status" id="sync-status"></p>
+  </section>
 
   <script>
-    const form = document.getElementById("stock-form");
-    const resultEl = document.getElementById("result");
-    const watchlistBody = document.getElementById("watchlist-body");
+    const selected = new Set();
+    const chips = document.getElementById("loc-chips");
+    const searchForm = document.getElementById("search-form");
+    const searchStatus = document.getElementById("search-status");
+    const resultsEl = document.getElementById("results");
+    const syncBtn = document.getElementById("sync-btn");
+    const syncStatus = document.getElementById("sync-status");
 
-    async function loadWatchlist() {
-      try {
-        const resp = await fetch("/watchlist");
-        const data = await resp.json();
-        if (!resp.ok) {
-          resultEl.textContent = "Error loading watchlist: " + (data.error || resp.statusText);
-          return;
-        }
-        watchlistBody.innerHTML = "";
-
-        if (!data.length) {
-          const emptyTr = document.createElement("tr");
-          emptyTr.className = "empty-row";
-          emptyTr.innerHTML = `<td colspan="5">Your watchlist is empty. Add a ticker above to get started.</td>`;
-          watchlistBody.appendChild(emptyTr);
-          return;
-        }
-
-        data.forEach((row) => {
-          const tr = document.createElement("tr");
-          const price = row.latest_price !== null && row.latest_price !== undefined
-            ? Number(row.latest_price).toFixed(2)
-            : "-";
-          const updated = row.updated_at ? new Date(row.updated_at).toLocaleString() : "-";
-          tr.innerHTML = `
-            <td>${row.symbol}</td>
-            <td>${row.email || "-"}</td>
-            <td>${price}</td>
-            <td>${updated}</td>
-            <td><button type="button" class="delete-btn" data-symbol="${row.symbol}">Remove</button></td>
-          `;
-          watchlistBody.appendChild(tr);
-        });
-      } catch (err) {
-        resultEl.textContent = "Failed to load watchlist: " + err;
-      }
+    function sourceLabel(sourceType) {
+      if (sourceType === "alert") return "Alert";
+      if (sourceType === "forecast") return "Forecast";
+      return sourceType || "";
     }
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const symbol = document.getElementById("symbol").value;
-      resultEl.textContent = "Adding to watchlist...";
+    function matchLabel(similarity) {
+      if (similarity == null || Number.isNaN(Number(similarity))) return "";
+      const score = Number(similarity);
+      if (score >= 0.55) return "Strong match";
+      if (score >= 0.35) return "Good match";
+      return "Related";
+    }
 
-      try {
-        const resp = await fetch("/watchlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ symbol }),
-        });
-        const data = await resp.json();
-        if (!resp.ok) {
-          resultEl.textContent = "Error: " + (data.error || resp.statusText);
-          return;
-        }
-        resultEl.textContent = "Added " + data.symbol + " at price " + data.latest_price;
-        document.getElementById("symbol").value = "";
-        loadWatchlist();
-      } catch (err) {
-        resultEl.textContent = "Request failed: " + err;
+    chips.addEventListener("click", (e) => {
+      const btn = e.target.closest("button.chip");
+      if (!btn) return;
+      const loc = btn.dataset.loc;
+      if (selected.has(loc)) {
+        selected.delete(loc);
+        btn.classList.remove("selected");
+      } else {
+        selected.add(loc);
+        btn.classList.add("selected");
       }
     });
 
-    watchlistBody.addEventListener("click", async (e) => {
-      const btn = e.target.closest(".delete-btn");
-      if (!btn) return;
-
-      const symbol = btn.dataset.symbol;
+    searchForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const query = document.getElementById("query").value.trim();
+      const btn = document.getElementById("search-btn");
       btn.disabled = true;
-      resultEl.textContent = "Removing " + symbol + "...";
+      searchStatus.textContent = "Searching...";
+      searchStatus.classList.remove("error");
+      resultsEl.innerHTML = "";
 
       try {
-        const resp = await fetch(`/watchlist/${encodeURIComponent(symbol)}`, {
-          method: "DELETE",
+        const resp = await fetch("/weather/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, top_k: 5 }),
         });
         const data = await resp.json();
         if (!resp.ok) {
-          resultEl.textContent = "Error: " + (data.error || resp.statusText);
-          btn.disabled = false;
+          throw new Error(data.error || resp.statusText);
+        }
+        if (data.message && (!data.results || data.results.length === 0)) {
+          searchStatus.textContent = data.message;
           return;
         }
-        resultEl.textContent = "Removed " + data.symbol + " from your watchlist.";
-        loadWatchlist();
+        const count = (data.results || []).length;
+        searchStatus.textContent = count
+          ? `Found ${count} answer${count === 1 ? "" : "s"}`
+          : "No matching weather updates found.";
+        for (const r of data.results || []) {
+          const li = document.createElement("li");
+          const metaParts = [
+            r.location || "",
+            sourceLabel(r.source_type),
+            matchLabel(r.similarity),
+          ].filter(Boolean);
+          li.innerHTML = `
+            <div class="meta">${escapeHtml(metaParts.join(" · "))}</div>
+            <div class="headline">${escapeHtml(r.headline || "")}</div>
+            <div class="chunk">${escapeHtml(r.chunk_text || "")}</div>
+          `;
+          resultsEl.appendChild(li);
+        }
       } catch (err) {
-        resultEl.textContent = "Request failed: " + err;
+        searchStatus.textContent = String(err.message || err);
+        searchStatus.classList.add("error");
+      } finally {
         btn.disabled = false;
       }
     });
 
-    loadWatchlist();
+    syncBtn.addEventListener("click", async () => {
+      if (selected.size === 0) {
+        syncStatus.textContent = "Select at least one city.";
+        syncStatus.classList.add("error");
+        return;
+      }
+      syncBtn.disabled = true;
+      syncStatus.classList.remove("error");
+      syncStatus.textContent = "Refreshing weather...";
+      try {
+        const resp = await fetch("/weather/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ locations: [...selected], limit: 50 }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.error || resp.statusText);
+        }
+        const places = (data.locations || []).join(", ");
+        syncStatus.textContent = `Updated weather for ${places}.`;
+      } catch (err) {
+        syncStatus.textContent = String(err.message || err);
+        syncStatus.classList.add("error");
+      } finally {
+        syncBtn.disabled = false;
+      }
+    });
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
   </script>
 </body>
 </html>

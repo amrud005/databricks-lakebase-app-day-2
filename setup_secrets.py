@@ -1,31 +1,25 @@
 """
-One-time setup script: creates the Databricks secret scope and stores the
-Massive API key. Run this locally (with the Databricks CLI configured) or
-from a notebook - never commit the resulting secret value anywhere.
+One-time setup script: stores the Lakebase connection URL in a Databricks
+secret scope. Run from a notebook or local CLI — never commit the secret.
 
 Usage:
     python setup_secrets.py
 """
+import getpass
+
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service import workspace
-import getpass
 
 w = WorkspaceClient()
 
-# w.secrets.create_scope(scope="massive")
-# w.secrets.put_secret(
-#     scope="massive",
-#     key="api-key",
-#     string_value=getpass.getpass("Paste your Massive API key: ")
-# )
-
+# Uncomment once if the scope does not exist yet:
 # w.secrets.create_scope(scope="database")
+
 w.secrets.put_secret(
     scope="database",
     key="lakebase-url",
-    string_value=getpass.getpass("Paste your Lakebase URL: ")
+    string_value=getpass.getpass("Paste your Lakebase URL: "),
 )
-
 
 w.secrets.put_acl(
     scope="database",
@@ -33,8 +27,4 @@ w.secrets.put_acl(
     permission=workspace.AclPermission.READ,
 )
 
-w.secrets.put_acl(
-    scope="massive",
-    principal="users",
-    permission=workspace.AclPermission.READ,
-)
+print("Stored secret database/lakebase-url")

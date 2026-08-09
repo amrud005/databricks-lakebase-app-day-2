@@ -4,3 +4,7 @@ __pycache__/
 .venv/
 venv/
 .idea/
+temp/
+.cache/
+*.egg-info/
+.DS_Store

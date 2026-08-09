@@ -1,13 +1,10 @@
-# Databricks Asset Bundle config for this project.
-# Deploy with: databricks bundle deploy -t dev   (or -t prod)
-# This wires up the ticker-news embeddings notebook as a scheduled Workflow
-# (see resources/ingest_ticker_news_embeddings_job.yml).
+# Databricks Asset Bundle config (optional).
+# Weather embeddings are usually run ad-hoc:
+#   python notebooks/ingest_weather_embeddings.py
+# You can add a Workflow later that points at that script/notebook.
 
 bundle:
-  name: databricks-lakebase-app-day-2
-
-include:
-  - resources/*.yml
+  name: databricks-lakebase-weather
 
 targets:
   dev:
